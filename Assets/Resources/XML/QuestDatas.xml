@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Quests>
+	<NPC id='0'>
+		<Quest>
+			<ID>0</ID>
+			<Title>몬스터 사냥꾼의 부상</Title>
+			<Description> 외눈 슬라임 5마리 처치 </Description>
+			<Reward>0</Reward>
+			<Dialog>
+				<Step>
+					1
+					<Speaker> 1 </Speaker>
+					<text> 자네 모험가인가? 부탁이 있다네.</text>
+				</Step>
+				<Step>
+					2
+					<Speaker> 0 </Speaker>
+					<text> 무슨 일이시죠? </text>
+				</Step>
+				<Step>
+					3
+					<Speaker> 1 </Speaker>
+					<text> 내가 몬스터를 사냥하다가 큰 부상을 당해서 할당량을 채우지 못했네. </text>
+				</Step>
+				<Step>
+					4
+					<Speaker> 0 </Speaker>
+					<text> 괜찮으신가요? </text>
+				</Step>
+				<Step>
+					5
+					<Speaker> 1 </Speaker>
+					<text> 괜찮다네. 자네가 나 대신 외눈 슬라임 5마리를 잡아줄 수 있겠나? </text>
+				</Step>
+			</Dialog>
+		</Quest>
+		
+	</NPC>
+
+</Quests>
