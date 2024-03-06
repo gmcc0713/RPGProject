@@ -1,0 +1,4 @@
+DropID,ItemID,DropPercent,DropGold,DropExp
+0,4;1,70;10,100,1000
+1,5;1,70;10,100,1000
+2,0;3,50;12,100,1000

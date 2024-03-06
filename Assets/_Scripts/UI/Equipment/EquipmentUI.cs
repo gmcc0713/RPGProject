@@ -6,11 +6,7 @@ public class EquipmentUI : MonoBehaviour
 {
     [SerializeField] private List<InventorySlot> equipmentUISlots;
     [SerializeField] private ItemToolTip baseItemToolTip;
-    private void Start()
-    {
-        Initialize();
-    }
-    void Initialize()
+    public void Initialize()
     {
         int size = equipmentUISlots.Count;
         for(int i =0;i<size;i++)

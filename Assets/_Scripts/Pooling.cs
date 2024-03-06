@@ -14,6 +14,11 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolingObject
     [SerializeField] [Range(1, 100)] int poolingAmount = 1;     //풀링 갯수
     Transform containerObject;                                  //풀링할 장소를 저장하는 부모 오브잭트
     Queue<T> objectPool;                                        //풀링할 장소
+                                  //
+    public void SettingParent(Transform parent = null)
+    {
+        containerObject = parent;
+    }
     public bool Initialize()
     {
         if (!targetObject || containerObject) return false;     
@@ -22,7 +27,6 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolingObject
         sb.Append("Object Pool Container : ");
         sb.Append(targetObject.name);
         containerObject = new GameObject(sb.ToString()).transform;
- 
         objectPool = new Queue<T>();                                            //풀링할 장소 할당
         MakeAndPooling();
         return true;
@@ -44,7 +48,6 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolingObject
 
     public bool GetObject(out T item)
     {
-
         item = null;
         if (!containerObject) return false;
         if (0 >= objectPool.Count)
@@ -60,7 +63,9 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolingObject
     {
         if (!(item && containerObject)) return false;
         item.gameObject.SetActive(false);
+
         objectPool.Enqueue(item);
+        item.transform.SetParent(containerObject);
         return true;
     }
     public bool Destroy()
@@ -72,7 +77,6 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolingObject
         objectPool = null;
         return true;
     }
-
 
     public void ReturnBackPool()
     {

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Smith
   m_EditorClassIdentifier: 
   NPCName: "\uB300\uC7A5\uC7A5\uC774 \uC544\uB974\uC9C8"
-  NPCTalk: "\uB09C \uB300\uC7A5\uC7A5\uC774"
+  NPCTalk: "\uB0B4 \uBB34\uAE30\uB97C \uBCF4\uC2DC\uAC8C \uC544\uC8FC \uC9C8\uC774
+    \uC88B\uB2E4\uB124"
   NPCImage: {fileID: 21300000, guid: 91a71e62b84c48547b14bcec513bff07, type: 3}
   type: 1

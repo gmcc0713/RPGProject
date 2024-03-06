@@ -293,7 +293,7 @@ MonoBehaviour:
   items: 
   slotPrefab: {fileID: 0}
   parent: {fileID: 0}
-  toolTipUpdate: {fileID: 0}
+  toolTip: {fileID: 0}
 --- !u!1 &3216435183577820279
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,8 +495,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uBB34\uAE30 \uC0C1\uC810\n"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 500eb9a737e5ad64f9a22bcc3ea57fa4, type: 2}
-  m_sharedMaterial: {fileID: -2380178778048334883, guid: 500eb9a737e5ad64f9a22bcc3ea57fa4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 7a31805e6affcc248b030c2315573abd, type: 2}
+  m_sharedMaterial: {fileID: 6294881756453862389, guid: 7a31805e6affcc248b030c2315573abd, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

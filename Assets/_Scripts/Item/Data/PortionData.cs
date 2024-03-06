@@ -2,18 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-enum PortionType
+public enum PortionType
 {
     HP = 0,
     MP,
-    EXP
-}
-[CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item/ConsumptionItem")]
 
+}
 
 public class PortionData : ItemData
 {
-    PortionType portionType;
-    public float value;
-
+    public int m_iID;
+    public PortionType m_eType;
+    public int m_iValue;
+    public void SetPortionData(string[] datas)
+    {
+        m_iID = int.Parse(datas[0]);
+        m_eType = System.Enum.Parse<PortionType>(datas[1]);
+        m_iValue = int.Parse(datas[2]);
+    }
 }

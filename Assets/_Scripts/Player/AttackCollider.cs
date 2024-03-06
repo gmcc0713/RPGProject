@@ -4,27 +4,34 @@ using UnityEngine;
 
 public class AttackCollider : MonoBehaviour
 {
-    private float weaponDamage = 50;
-    public float _weaponDamage => weaponDamage;
-    public int _weaponCombo => weaponCombo;
-    private int weaponCombo;
-    public bool isAttack;
+     [SerializeField]  private int m_weaponDamage;
+    [SerializeField] private int m_playerDamage;
+    [SerializeField] private int m_critical;
 
-
-
-    public void AttackComboSet(int comboNum)        //공격을 할때의콤보설정
+    
+    public void SetPlayerDamage(int playerDamage)
     {
-        weaponCombo = comboNum;
+        m_playerDamage = playerDamage;
     }
-    public bool AttackComboCheck(int comboNum)      //몬스터가 이전에 받았던 콤보와 현재의 콤보가 같은지 확인(한번의 콤보에두번공격 당하는 것 방지)
+    public void SetWeaponDamage(int weaponDamage)
     {
-
-        if(isAttack&&comboNum != weaponCombo)
-        {
-                return true;
-        }
-        return false;
-
+        m_weaponDamage = weaponDamage;
+    }
+    public void SetCritical(int critical)
+    {
+        m_critical = critical;
         
     }
+    public int CalculateDamage()
+    {
+        int sumDamage = 0;
+        if (Random.Range(0, 100) < m_critical)
+        {
+            sumDamage += m_playerDamage;
+        }
+        sumDamage += m_playerDamage;
+        sumDamage += m_weaponDamage;
+        return sumDamage;
+    }
+    
 }

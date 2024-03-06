@@ -19,8 +19,6 @@ public class ItemToolTip : MonoBehaviour
     
     public void UpdateToolTip(ItemData data)
     {
-
-
         UpdateCommonData(data);
 
         switch (data.itemtype)
@@ -51,7 +49,7 @@ public class ItemToolTip : MonoBehaviour
     void UpdateWeaponText(ItemData data)
     {
         WeaponData wData = (WeaponData)data;
-
+        
         descriptionText.color = Color.red;
         itemNameText.text = AddString(itemNameText.text, "\n<color=#996633>종류</color> \n", "무기");
         descriptionText.text = AddString("<color=orange>필요 레벨 ", wData.equipmentLevel.ToString()," LV</color>");
@@ -78,7 +76,7 @@ public class ItemToolTip : MonoBehaviour
         itemNameText.text = AddString(itemNameText.text, "\n<color=#996633>종류</color> \n", "포션");
         descriptionText.color = Color.green;
         
-        descriptionText.text = AddString("포션 회복량 : ", pData.value.ToString());
+        descriptionText.text = AddString("포션 회복량 : ", pData.m_iValue.ToString());
 
     }
     void UpdateEtcItemText(ItemData data)

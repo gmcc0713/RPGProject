@@ -12,6 +12,7 @@ public class QuestLoader : MonoBehaviour
    
     public TextAsset xmlFile;
     private List<Quest_Reward> m_lRewards;
+    private List<Quest_Data> m_lQuests;
     private int m_iNpcCount = 1;
     private void Awake()
     {
@@ -22,51 +23,63 @@ public class QuestLoader : MonoBehaviour
     {
         XmlDocument xmlDocument = new XmlDocument();
     }
-    public List<Quest_Data> LoadQuests()
+    public List<Quest_Data> GetQuestDatas()
+    {
+        return m_lQuests;
+    }
+    public void LoadQuests()
     {
         var txtAsset = (TextAsset)Resources.Load("XML/QuestDatas");
         XmlDocument xmlDocument = new XmlDocument();
         xmlDocument.LoadXml(txtAsset.text);
         List<Quest_Data> quests = new List<Quest_Data>();
+        string[] announcements = new string[3];
         for (int i =0;i< m_iNpcCount;i++)
         {
             XmlNodeList npcQuestNodes = xmlDocument.SelectNodes($"/Quests/NPC[@id='{i}']/Quest");
             int rewardID;
-            foreach (XmlNode questNode in npcQuestNodes)
+            foreach (XmlNode questNode in npcQuestNodes)        //퀘스트 기준으로 데이터 가져오기
             {
                 Quest_Data quest = new Quest_Data();
-                quest.questID = int.Parse(questNode.SelectSingleNode("ID").InnerText);
-                quest.title = questNode.SelectSingleNode("Title").InnerText;
-                quest.description = questNode.SelectSingleNode("Description").InnerText;
+                quest.m_iQuestID = int.Parse(questNode.SelectSingleNode("ID").InnerText);
+                quest.m_sTitle = questNode.SelectSingleNode("Title").InnerText;
+                quest.m_Description = questNode.SelectSingleNode("Description").InnerText;
+                quest.m_iNPCID = i;
                 rewardID = int.Parse(questNode.SelectSingleNode("Reward").InnerText);
-                string xpath = $"/Quests/NPC[@id='{i}']/Quest[ID='{quest.questID}']/Dialog/Step";
+
+                quest.m_sRequire.requireLV = int.Parse(questNode.SelectSingleNode("RequireLV").InnerText);
+                quest.m_sRequire.count= int.Parse(questNode.SelectSingleNode("RequireCount").InnerText);
+                quest.m_sRequire.id = int.Parse(questNode.SelectSingleNode("RequireID").InnerText);
+                quest.m_eType = (Quest_Type)int.Parse(questNode.SelectSingleNode("QuestType").InnerText);
+                announcements[(int)Announcement_Type.Accept] = questNode.SelectSingleNode("QuestAccept").InnerText;
+                announcements[(int)Announcement_Type.Refuse] = questNode.SelectSingleNode("QuestCancle").InnerText;
+                announcements[(int)Announcement_Type.Non] = questNode.SelectSingleNode("QuestNon").InnerText;
+                quest.m_arrAnnouncement = announcements;
+                string xpath = $"/Quests/NPC[@id='{i}']/Quest[ID='{quest.m_iQuestID}']/Dialog/Step";
                 XmlNodeList dialogNodes = questNode.SelectNodes(xpath);
 
                 // 수정: dialogNode를 기준으로 데이터 가져오도록 수정
                 foreach (XmlNode dialogNode in dialogNodes)
                 {
-                    string speaker = dialogNode.SelectSingleNode("Speaker").InnerText;
                     string text = dialogNode.SelectSingleNode("text").InnerText;
 
                     // 수정: 대화 스텝을 객체로 저장
-                    if (quest.dialog == null)
+                    if (quest.m_lDialog == null)
                     {
-                        quest.dialog = new List<string[]>();
+                        quest.m_lDialog = new List<string>();
                     }
-                    quest.dialog.Add(new string[] { speaker, text });
+                    quest.m_lDialog.Add(new string(text));
 
                 }
-                quest.rewards = m_lRewards[rewardID];
+                quest.m_sReward = m_lRewards[rewardID];
 
                 quests.Add(quest);
 
             }
         }
-        return quests;
-        // 특정 NPC의 Quest 노드들을 가져온다
+        m_lQuests = quests;
        
     }
-    
     public void RewardLoad()
     {
         var txtAsset = (TextAsset)Resources.Load("XML/RewardDatas");
@@ -88,7 +101,6 @@ public class QuestLoader : MonoBehaviour
                 rewardTmp.rewardItem.Add(int.Parse(item.SelectSingleNode("ItemId").InnerText), int.Parse(item.SelectSingleNode("ItemAmount").InnerText));
             }
             m_lRewards.Add(rewardTmp);
-            Debug.Log(rewardTmp.rewardGold);
         }
 
 

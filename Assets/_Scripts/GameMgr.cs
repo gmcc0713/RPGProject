@@ -7,7 +7,8 @@ public class GameMgr : MonoBehaviour
 {
     public static GameMgr Instance { get; private set; }
     [SerializeField] PlayerInput playerInput;
-
+    private ThirdPersonMovement player;
+    public ThirdPersonMovement _player => player;
     void Awake()
     {
         if (null == Instance)
@@ -32,9 +33,14 @@ public class GameMgr : MonoBehaviour
         playerInput.actions["MouseLeftClick"].performed += ThirdPersonMovement.Instance.OnMouseButtonDown;          //공격(마우스왼쪽)
 
         //playerInput.actions["InteractionButtonClick"].performed += ThirdPersonMovement.Instance.OnMouseButtonDown;          //상호작용(space)
+        player = GameObject.Find("Player").GetComponent<ThirdPersonMovement>();
 
+        PlayerDataManager.Instance.Initialize();
+        ThirdPersonMovement.Instance.Initialize();
 
-
+    }
+    private void OnEnable()
+    {
     }
     private void OnDisable()
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
 public class ThirdPersonMovement : MonoBehaviour
 {
     public static ThirdPersonMovement Instance { get; private set; }
@@ -12,12 +13,13 @@ public class ThirdPersonMovement : MonoBehaviour
         if (null == Instance)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
             return;
         }
         Destroy(gameObject);
     }
+
     public CharacterController controller;
+    [SerializeField] PlayerDataUI m_playerDataUI;
     public Transform cam;
     private Vector2 input;
     [SerializeField] float speed = 0.8f;
@@ -25,22 +27,52 @@ public class ThirdPersonMovement : MonoBehaviour
     private float gravity = -9.81f;
     private Vector3 moveDir;
 
-     public float turnSmoothTime = 0.1f;
-     float turnSmoothVelocity;
-    public bool isGround;
+
+    private float turnSmoothTime = 0.1f;
+    private float turnSmoothVelocity;
+    private bool isGround;
 
     [SerializeField] private Animator animator;
     public Animator _playerAnim => animator;
+    [SerializeField] private bool canAct;
     private bool isMove = false;
     private bool isAttack;
     public bool _isAttack { get; set; }
-    public AttackCollider weapon;
+    public bool _isMove { get; set; }
     private int attackCombo = 0;
+    [SerializeField] private AttackCollider m_attackCollider;
+    public bool _canAct { get; set; }
+    
+
+    private PlayerData m_PlayerData;
+    [SerializeField] private PlayerStats m_statsData;
+    [SerializeField]  private float m_iCurPlayerHealth;
+    [SerializeField]  private float m_iCurPlayerMP;
+    [SerializeField] private Inventory m_Inventory;
+    [SerializeField] private Equipment m_Equipment;
 
     void Update()
     {
-        Move();
+        if(canAct)
+            Move();
     }
+   public void Initialize()
+    {
+        m_PlayerData = SaveLoadManager.Instance.LoadPlayerData();
+        if(m_PlayerData == null)
+        {
+                m_PlayerData = new PlayerData();
+            m_PlayerData.SetPlayerData("플레이어1", "무직", "초보자", 1, 0);
+        }
+
+        m_statsData.Initialize();
+        m_statsData.UpdatePlayerData(m_PlayerData);
+        m_iCurPlayerHealth = m_statsData._StatsData.HP;
+        m_playerDataUI.UpdateUI(m_iCurPlayerHealth/m_statsData._StatsData.HP,m_iCurPlayerMP/ m_statsData._StatsData.MP, m_PlayerData._curEXP / m_PlayerData._EXP,m_PlayerData._sUserName);
+
+        SetDamage();
+    }
+    
     private void Move()
     {
         if (isAttack)
@@ -85,33 +117,52 @@ public class ThirdPersonMovement : MonoBehaviour
 
     public void OnMouseButtonDown(InputAction.CallbackContext context)
     {
-        Debug.Log("Attack");
-        attackCombo++;
-        if (attackCombo == 1)
+        if (canAct)
         {
-            animator.SetBool("AttackCombo_1", true);
-            isAttack = true;
-            weapon.AttackComboSet(1);
+            attackCombo++;
+            isAttack = false;
+            if (attackCombo == 1)
+            {
+                animator.SetBool("AttackCombo_1", true);
+                isAttack = true;
+            }
+            else if (attackCombo >= 2 && animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f && animator.GetCurrentAnimatorStateInfo(0).IsName("combo1"))
+            {
+                animator.SetBool("AttackCombo_1", false);
+                animator.SetBool("AttackCombo_2", true);
+                isAttack = true;
+            }
+            else if (attackCombo >= 3 && animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f && animator.GetCurrentAnimatorStateInfo(0).IsName("combo2"))
+            {
+                animator.SetBool("AttackCombo_2", false);
+                animator.SetBool("AttackCombo_3", true);
+                isAttack = true;
+            }
         }
-        else if (attackCombo >= 2 && animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f && animator.GetCurrentAnimatorStateInfo(0).IsName("combo1"))
-        {
-            animator.SetBool("AttackCombo_1", false);
-            animator.SetBool("AttackCombo_2", true);
-            isAttack = true;
-            weapon.AttackComboSet(2);
-        }
-        else if (attackCombo >= 3 && animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f && animator.GetCurrentAnimatorStateInfo(0).IsName("combo2"))
-        {
-            animator.SetBool("AttackCombo_2", false);
-            animator.SetBool("AttackCombo_3", true);
-            isAttack = true;
-            weapon.AttackComboSet(3);
-        }
-        weapon.isAttack = isAttack;
-
     }
+    public void SetDamage()
+    {
+        
+        m_attackCollider.SetPlayerDamage(m_statsData._StatsData.AttackDamage);
+        m_attackCollider.SetCritical(m_statsData._StatsData.Critical);
+        m_attackCollider.SetWeaponDamage(m_statsData._StatsData.Critical);
+    }
+    public void GetDamaged(float damage)
+    {
+        float damageOffset = 0;
+        if(m_statsData._StatsData.Defence > damage)
+        {
+            damageOffset = 0.5f;
+        }
+        else
+        {
+            damageOffset = 1.0f;
+        }
 
-
+        m_iCurPlayerHealth -= damage * damageOffset;
+        Mathf.Clamp(m_iCurPlayerHealth, 0, m_statsData._StatsData.HP);
+        m_playerDataUI.SetPlayerHPUI(m_iCurPlayerHealth / m_statsData._StatsData.HP);
+    }
     public void Attack()
     {
 
@@ -120,29 +171,23 @@ public class ThirdPersonMovement : MonoBehaviour
             animator.SetBool("AttackCombo_1", false); 
             attackCombo = 0;
             isAttack = false;
-            weapon.isAttack = isAttack;
-
-            weapon.AttackComboSet(0);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f && animator.GetBool("AttackCombo_2"))
         {
             animator.SetBool("AttackCombo_2", false); 
             attackCombo = 0;
             isAttack = false;
-            weapon.isAttack = isAttack;
-            weapon.AttackComboSet(0);
         }
         else if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f && animator.GetBool("AttackCombo_3"))
         {
             animator.SetBool("AttackCombo_3", false);
             attackCombo = 0;
             isAttack = false;
-            weapon.isAttack = isAttack;
-            weapon.AttackComboSet(0);
         }
 
 
     }
+
     void FixedUpdate()
     {
         Attack();
@@ -153,6 +198,19 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             isGround = true;
         }
+        if (other.CompareTag("InteractionObject"))
+        {
+
+            other.GetComponent<InteractionObject>().ShowOrHideInteractionObject(true);
+        }
+
+    }
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("InteractionObject") && Input.GetKeyUp(KeyCode.Space)) 
+        {
+            other.GetComponent<InteractionObject>().PressInteractionKey();
+        }
     }
     void OnTriggerExit(Collider other)
     {
@@ -160,5 +218,52 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             isGround = false;
         }
+        if (other.CompareTag("InteractionObject"))
+        {
+            other.GetComponent<InteractionObject>().ShowOrHideInteractionObject(false);
+        }
+    }
+   public void SetCanAct(bool canActing)
+    {
+        canAct = canActing;
+    }
+    public void AddExp(float exp)
+    {
+        m_PlayerData.AddExp(exp);
+
+        m_playerDataUI.SetPlayerEXPUI(m_PlayerData._curEXP/m_PlayerData._EXP);
+    }
+    public void UsePortionItem(PortionType type,int value)
+    {
+        switch (type)
+        {
+            case PortionType.HP:
+                m_iCurPlayerHealth += value;
+                m_iCurPlayerHealth = Mathf.Clamp(m_iCurPlayerHealth, 0, m_statsData._StatsData.HP);
+                break;
+            case PortionType.MP:
+                m_iCurPlayerMP += value;
+                m_iCurPlayerHealth = Mathf.Clamp(m_iCurPlayerMP, 0, m_statsData._StatsData.MP);
+                break;
+        }
+        //m_playerDataUI.UpdateUI(m_iCurPlayerHealth, m_iCurPlayerHealth)
+    }
+    public void LVUP()
+    {
+        m_statsData.StatsPointUp();
+        m_iCurPlayerHealth = m_statsData._StatsData.HP;
+        m_playerDataUI.SetPlayerHPUI(m_iCurPlayerHealth/ m_statsData._StatsData.HP);
+
+        m_PlayerData.LVUP();
+    }
+    public void SavePlayerData()
+    {
+        SaveLoadManager.Instance.SavePlayerData(m_PlayerData);
+    }
+    public void SetPlayerDataByCustomizing(string playerName)
+    {
+        m_PlayerData.SetPlayerData(playerName, "무직", "초보자", 1, 0);
+        m_statsData.UpdatePlayerData(m_PlayerData);
+        m_playerDataUI.UpdateUI(m_iCurPlayerHealth/m_statsData._StatsData.HP,m_iCurPlayerMP/ m_statsData._StatsData.MP, m_PlayerData._curEXP / m_PlayerData._EXP,m_PlayerData._sUserName);
     }
 }

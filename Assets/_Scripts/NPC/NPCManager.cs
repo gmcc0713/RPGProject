@@ -8,17 +8,35 @@ public enum NPCType
 }
 public class NPCManager : MonoBehaviour
 {
-    [SerializeField] GameObject dialogPanel;
-    [SerializeField] List<NPCController> m_NPCs;
-    
+    //================== ΩÃ±€≈Ê==========================================
+    public static NPCManager Instance { get; private set; }
 
-    void Start()
+    void Awake()
     {
-        
+        if (null == Instance)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            return;
+        }
+        Destroy(gameObject);
     }
-    // Update is called once per frame
-    void Update()
+
+    //====================================================================
+    [SerializeField] private GameObject dialogPanel;
+    [SerializeField] private List<NPCController> m_NPCs;
+
+    public int GetQuestID(int idx)
     {
-        
+        return m_NPCs[idx].GetQuestId();
     }
+    public Quest_Data GetQuest(int idx)
+    {
+        return m_NPCs[idx].GetQuestData();
+    }
+    void Initialize()
+    {
+
+    }
+
 }

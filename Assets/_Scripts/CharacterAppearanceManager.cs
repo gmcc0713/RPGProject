@@ -4,7 +4,9 @@ using UnityEngine;
 
 public enum AppearanceType
 {
-
+    Axe = 0,
+    Mace,
+    Sword
 }
 
 public class CharacterAppearanceManager : MonoBehaviour

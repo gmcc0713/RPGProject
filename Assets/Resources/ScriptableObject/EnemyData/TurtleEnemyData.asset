@@ -16,6 +16,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   type: 0
+  enemyID: 0
+  enemyName: "\uCCA0\uAC11 \uAC70\uBD81"
   searchRange: 7
   attackRange: 3
   attackDuration: 2.3

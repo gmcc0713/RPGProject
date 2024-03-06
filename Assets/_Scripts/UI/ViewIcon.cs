@@ -12,7 +12,6 @@ public class ViewIcon : MonoBehaviour
     private void Start()
     {
         instance = this;
-       
     }
     public void DragSetImage(Sprite _itemImage)
     {
@@ -26,5 +25,9 @@ public class ViewIcon : MonoBehaviour
         Color color = image.color;
         color.a = _alpha;
         image.color = color;
+    }
+    public void SetEmpty()
+    {
+           
     }
 }

@@ -1,0 +1,4 @@
+NPCID,NPCName,NPCTalk,ItemIcon,TYPE
+0,사냥꾼 로건,반갑다 난 이 마을의 사냥꾼 나한테 사냥의 기술을 배워볼래?,Npc/Hunter_Image,Hunter
+1,대장장이 아르질,내 무기를 보시게 아주 질이 좋다네,Npc/Smith_Image,Smith
+2,마을 길잡이 로빈,안녕? 이 마을은 처음이지?,Npc/Tutorial_Image,Tutorial

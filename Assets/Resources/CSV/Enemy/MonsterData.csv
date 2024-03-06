@@ -1,0 +1,4 @@
+Id,MonsterName,MonsterType,SearchRange,AttackRange,AttackDuration,AttackDamage,MaxHealth,MoveSpeed,dropItemID
+0,Ã¶°©°ÅºÏ,Turtle,7,3,2.3,5,200,5,0
+1,¿Ü´« ½½¶óÀÓ,Slime,7,3,2.3,10,500,5,1
+2,½ºÄÌ·¹Åæ,Skeleton,10,3,2.3,20,1000,5,2

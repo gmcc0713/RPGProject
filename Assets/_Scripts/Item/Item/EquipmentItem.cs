@@ -5,6 +5,7 @@ using UnityEngine;
 public class EquipmentItem : Item
 {
     public int upgrade;
+
     private void Start()
     {
         Initialize();
@@ -21,5 +22,9 @@ public class EquipmentItem : Item
         upgrade = _upgrade;
         slotNum = _slotNum;
         isEquipment = _isEquipment;
+    }
+    public override void ItemUse() 
+    {
+
     }
 }

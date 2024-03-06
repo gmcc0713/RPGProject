@@ -1,0 +1,11 @@
+ItemID,ItemType,ItemName,ItemIcon,IsEquipmentItem,CanUse,Price,DetailDataID
+0,Weapon,낡은 검,ItemIcon/Equipment/Weapon/1_Sword,TRUE,FALSE,100,0
+1,Weapon,기사의 검,ItemIcon/Equipment/Weapon/2_Sword,TRUE,FALSE,2000,1
+2,Weapon,산적의 철퇴,ItemIcon/Equipment/Weapon/3_Mace,TRUE,FALSE,500,2
+3,Weapon,은빛 도끼,ItemIcon/Equipment/Weapon/4_Axe,TRUE,FALSE,800,3
+4,Etc,외눈슬라임의 점액질,ItemIcon/ETC/1_ETC,FALSE,FALSE,30,0
+5,Etc,철갑 거북의 등껍질,ItemIcon/ETC/2_ETC,FALSE,FALSE,30,1
+6,Portion,소형 체력 포션,ItemIcon/Portion/1_HPPortion,FALSE,TRUE,50,0
+7,Portion,중형 체력 포션,ItemIcon/Portion/1_HPPortion,FALSE,TRUE,100,1
+8,Portion,소형 마나 포션,ItemIcon/Portion/2_MPPortion,FALSE,TRUE,50,2
+9,Portion,중형 마나 포션,ItemIcon/Portion/2_MPPortion,FALSE,TRUE,100,3

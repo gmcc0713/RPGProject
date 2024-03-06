@@ -4,35 +4,30 @@ using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
-
 public enum RotateType { RotToTarget,RotToSpawnPos}
 public class Enemy : MonoBehaviour,IPoolingObject
 {
-    private EnemyType type;
-    public EnemyType _type => type;
-    private float maxHealth = 100f;
-    private float curHealth = 100f;
-    private float searchRange;
-    private float attackRange;
+    [SerializeField]private int EnemyID;
+    private EnemyData m_cEnemyData;
+    [SerializeField] EnemyDropItemDatas m_eEnemyDropItems;
+
+    public EnemyData _EnemyData => m_cEnemyData;
+
+    public NavMeshAgent agent;
+    private EnemyFSM fsm;
+    private StateData stateData = null;
+    private EnemySpawner enemySpawner;
+    private Animator animator;
+    private float curHealth ;
     [SerializeField] private Slider enemyHealthBar;
 
     public bool isMoving;
-
     public Transform target;
     public Vector3 defaultPos;
-
-    Rigidbody rigid;
-
-    
-    public NavMeshAgent agent;
-    EnemyFSM fsm;
-    StateData stateData = null;
-    EnemyData data;
-    EnemySpawner enemySpawner;
-    Animator animator;
-    public int getDamagedCombo;
     public Animator _animator => animator;
-    bool isDie = false;
+    [SerializeField] private bool m_bIsDamaged = false;
+    private bool isDie = false;
+    private bool m_bCanAttack = true;
     private void Awake()
     {
         Initialize();
@@ -40,19 +35,24 @@ public class Enemy : MonoBehaviour,IPoolingObject
     public void Initialize()
     {
         agent = GetComponent<NavMeshAgent>();
-        rigid = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+        m_bIsDamaged = false;
+
     }
     public void ResetData()
     {
+        
         if (fsm != null)
         {
             fsm.ChangeState(stateData.IdleState);
         }
-        curHealth = maxHealth;
+        if(m_cEnemyData == null)
+        {
+            m_cEnemyData = EnemyManager.Instance.GetEnemyData(EnemyID);
+        }
+        curHealth = m_cEnemyData._maxHealth;
         enemyHealthBar.value = 1;
-        getDamagedCombo = 0;
-
+        isDie = false;
 
     }
     public void SetPosition(Vector3 pos)
@@ -74,26 +74,21 @@ public class Enemy : MonoBehaviour,IPoolingObject
 
         if (null == enemyData)
         {
-            Debug.Log("enemyData 가 null");
             return false;
         }
         if (null == fsm) fsm = new EnemyFSM(this);
         if (!fsm.SetCurrState(stateData.IdleState))
         {
-            Debug.Log("stateData 가 null");
             return false;
         }
-        
-        maxHealth = enemyData._maxHealth;
-        searchRange = enemyData._searchRange;
-        attackRange = enemyData._attackRange;
 
-
+        isDie = false;
         gameObject.SetActive(true);
 
         defaultPos = transform.position;
         ResetData();
 
+        m_eEnemyDropItems = EnemyManager.Instance.GetEnemyDropItemDatas(m_cEnemyData._dropItemID);
         return true;
     }
 
@@ -115,12 +110,12 @@ public class Enemy : MonoBehaviour,IPoolingObject
 
     public void SearchTarget()      // 타겟이 범위 안에 있는지 확인
     {
-        if (DistanceToTarget() > 0 && DistanceToTarget() <= searchRange)
+        if (DistanceToTarget() > 0 && DistanceToTarget() <= m_cEnemyData._searchRange)
         {
             fsm.ChangeState(stateData.MoveState);
         }
     }
-    public float DistanceToTarget()     //타겟과의 거리
+    public float DistanceToTarget()     //타겟과의 거리 
     {
         if (!target) return -1;
         return Vector3.Distance(target.position, transform.position);
@@ -128,12 +123,12 @@ public class Enemy : MonoBehaviour,IPoolingObject
     public void MoveToTarget()          //타겟에게로 이동
     {
         animator.SetBool("IsMoving",true);
-        if (DistanceToTarget() < attackRange)       //공격사거리 안에 타겟이 있을때
+        if (DistanceToTarget() < m_cEnemyData._attackRange)       //공격사거리 안에 타겟이 있을때
         {
             fsm.ChangeState(stateData.AttackState);
             return;
         }
-        else if (DistanceToTarget() < searchRange)  //탐색사거리 안에 타겟이 있을때
+        else if (DistanceToTarget() < m_cEnemyData._searchRange)  //탐색사거리 안에 타겟이 있을때
         {
             agent.isStopped = false;
             
@@ -178,7 +173,7 @@ public class Enemy : MonoBehaviour,IPoolingObject
     }
     public void ReturnDefaultPos()      //원래의 자리로 돌아가기
     {
-        if (DistanceToTarget() > 0 && DistanceToTarget() <= searchRange)    //타겟이 범위안에 들어왔을때
+        if (DistanceToTarget() > 0 && DistanceToTarget() <= m_cEnemyData._searchRange)    //타겟이 범위안에 들어왔을때
         {
             fsm.ChangeState(stateData.MoveState);
             return;
@@ -195,18 +190,33 @@ public class Enemy : MonoBehaviour,IPoolingObject
     public void AttackTarget()
     {
         StopMove();
-
+        RotateToTarget(RotateType.RotToTarget);
         animator.SetBool("IsAttack",true);
-        if (DistanceToTarget() > attackRange)
+        if (DistanceToTarget() > m_cEnemyData._attackRange)
         {
             animator.SetBool("IsAttack", false);
             fsm.ChangeState(stateData.MoveState);
         }
+        if(m_bCanAttack)
+        {
+            target.GetComponent<ThirdPersonMovement>().GetDamaged(50);
+            StartCoroutine(AttackDelay());
+        }
+    }
+    private IEnumerator AttackDelay()
+    {
+        m_bCanAttack = false;
+        yield return new WaitForSeconds(3.0f);
+        m_bCanAttack = true;
     }
     public void SetDieState()
     {
         isDie = true;
         animator.SetBool("IsDie",true);
+        QuestManager.Instance.NotifyQuestUpdate(Quest_Type.Type_Kill, (int)m_cEnemyData._type, 1);
+        if(DungeonManager.Instance)
+             DungeonManager.Instance.DieMonster();
+        DropItem();
     }
     public void Die()
     {
@@ -216,30 +226,41 @@ public class Enemy : MonoBehaviour,IPoolingObject
             enemySpawner.DieEnemy(this);
         }
     }
+    IEnumerator WaitForNextAttacked()
+    {
+        m_bCanAttack = true;
+        yield return new WaitForSeconds(0.3f);
+        m_bCanAttack = false;
+    }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Weapon"))
+        if(other.CompareTag("AttackCollider")&&!m_bIsDamaged)
         {
-            AttackCollider weapon = other.GetComponent<AttackCollider>();
-            if (weapon.AttackComboCheck(getDamagedCombo))
-            {
-                Debug.Log("AttackSuccess");
-                getDamagedCombo = weapon._weaponCombo;
-                curHealth -= weapon._weaponDamage;
-                enemyHealthBar.value = curHealth / maxHealth;
-            }
-            if(!weapon.isAttack)
-            {
-                getDamagedCombo = 0;
-            }
+           curHealth -= other.GetComponent<AttackCollider>().CalculateDamage();
+
+            enemyHealthBar.value = curHealth / m_cEnemyData._maxHealth;
+            StartCoroutine(WaitForNextAttacked());
         }
 
-        if(curHealth <=0)
+        if(curHealth <=0 && isDie == false)
         {
             fsm.ChangeState(stateData.DieState);
-
         }
     }
-    
-    
+    public void DropItem()
+    {
+        for(int i =0;i< m_eEnemyDropItems.dropItems.Count;i++)
+        {
+            int rand = Random.RandomRange(0, 100);
+            if(rand  < m_eEnemyDropItems.dropItems[i].dropPercent)
+            {
+                Inventory.Instance.GetItem(m_eEnemyDropItems.dropItems[i].itemID);
+                //Inventory.Instance.GetItem(0);
+
+            }
+        }
+        Inventory.Instance.AddGold(m_eEnemyDropItems.gold);
+        ThirdPersonMovement.Instance.AddExp(m_eEnemyDropItems.exp);
+
+    }
 }

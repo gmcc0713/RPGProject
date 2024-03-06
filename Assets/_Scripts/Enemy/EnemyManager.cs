@@ -1,7 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public enum EnemyType {Turtle = 0,Slime = 1 }
+using System;
+public enum EnemyType {Turtle = 0,Slime = 1, Skeleton = 2, }
+[Serializable]
+public struct DropItemData
+{
+    public int itemID;
+    public int dropPercent;
+}
+[Serializable]
+public struct EnemyDropItemDatas
+{
+    public List<DropItemData> dropItems;
+    public int gold;
+    public int exp;
+
+}
+
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
@@ -15,8 +31,35 @@ public class EnemyManager : MonoBehaviour
         }
         Destroy(gameObject);
     }
-    [SerializeField] private List<EnemyData> enemyData = new List<EnemyData>();
 
+    [SerializeField] private List<EnemyData> m_enemyDatas = new List<EnemyData>();
+    [SerializeField] public List<EnemyData> _enemyData => m_enemyDatas;
+    [SerializeField] DropItemLoader dropitemLoader;
+    [SerializeField]  List<string[]> enemyDatas;
+    private void Start()
+    {
+        Initialize();
+    }
+    void Initialize()
+    {
+        LoadMonsterDatas();
+    }
+    void LoadMonsterDatas()
+    {
+        enemyDatas = SCVLoadManager.Instance.Load("CSV/Enemy/MonsterData");
+        for (int i =0;i<enemyDatas.Count;i++)
+        {
+
+            EnemyData data = new EnemyData();
+            data.SetData(enemyDatas[i]);
+            m_enemyDatas.Add(data);
+
+        }
+    }
+    public EnemyData GetEnemyData(int enemyID)
+    {
+        return m_enemyDatas[enemyID];
+    }
     public void EnemyInit(Enemy enemy)
     {
         
@@ -28,10 +71,10 @@ public class EnemyManager : MonoBehaviour
         StateData data = ScriptableObject.CreateInstance<StateData>();
         data.SetData(idle, move, attack, returnPos,die);
 
-        enemy.SetData(data,enemyData[(int)enemy._type]);
+        enemy.SetData(data, m_enemyDatas[(int)enemy._EnemyData._type]);
     }
-    public void EnemyStateDataInit()
+    public EnemyDropItemDatas GetEnemyDropItemDatas(int dropID)
     {
-
+        return dropitemLoader.GetDropItemDatas(dropID);
     }
 }

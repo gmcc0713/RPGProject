@@ -14,25 +14,26 @@ public class Inventory : MonoBehaviour
         if (null == Instance)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
             return;
         }
         Destroy(gameObject);
     }
 
-    public List<Item> inventoryItems = new List<Item>();       //현재 내가 가지고 있는 아이템
+    public List<Item> inventoryItems;       //현재 내가 가지고 있는 아이템
     [SerializeField] private int itemMaxAmount = 64;
     [SerializeField] private int SlotmaxCount = 24;
     [SerializeField] private InventoryUI inventoryUI;
     [SerializeField] private int playerGold;
-
+    [SerializeField] private PlayerQuickSlot m_playerQuickSlot;
     private void Start()
     {
         initialize();
     }
     void initialize()
     {
+        inventoryItems = new List<Item>();
         inventoryUI.UpdateGoldUI(playerGold);
+        SaveLoadManager.Instance.LoadInventory();
     }
     public bool BuyItem(int id, int gold)
     {
@@ -56,55 +57,107 @@ public class Inventory : MonoBehaviour
         {
             playerGold = 0;
         }
+    }
 
-    }
-    public void TestGetItem()           //테스트용 아이템 추가
-    {
-        Debug.Log("click");
-        GetItem(4, 10);
-        GetItem(6, 10);
-        GetItem(7, 10);
-        GetItem(9, 10);
-    }
     public void GetItem(int itemID, int amount = 1, int upgrade = 0)    //아이템을 얻었을때 장비아이템인지 아닌지 판별
     {
+        QuestManager.Instance.NotifyQuestUpdate(Quest_Type.Type_Collect, itemID, amount);
         if (ItemDataManager.Instance.CheckIsEquipmentItem(itemID))      //해당 아이템이 장비아이템이여서 겹치기가 불가능할때
         {
             AddEquipmentItem(itemID, upgrade);
+            return;
+        }
+        else if(ItemDataManager.Instance.CheckCanUseItem(itemID))
+        {
+            AddPortionItem(itemID, amount);
             return;
         }
         AddCountableItem(itemID, amount);
 
 
     }
-    public void AddCountableItem(int id, int amount)                    //갯수 샐수있는 아이템을 얻었을때
+    public void AddPortionItem(int id, int amount)
     {
+        Debug.Log("AddPortion");
         for (int i = 0; i < inventoryItems.Count; i++)
         {
             if (!inventoryItems[i].isEquipment)
             {
-                CountableItem cItem = (CountableItem)inventoryItems[i];
-
-                if (cItem.id == id && cItem.amount < itemMaxAmount)        //해당아이템을 이미 보유하고 있다면 
+                if(inventoryItems[i] is PortionItem cItem)
                 {
-                    ChangeAmount(i, amount);            //아이템 갯수 추가
-
-                    ItemAmountOverCheck(i);                 //해당아이템이 최대 갯수 넘었는지 확인
-                    return;
+                    if (cItem.id == id && cItem.amount < itemMaxAmount)        //해당아이템을 이미 보유하고 있다면 
+                    {
+                        ChangeAmount(i, amount);            //아이템 갯수 추가
+                        m_playerQuickSlot.UpdateQuickSlot(i);
+                        ItemAmountOverCheck(i);                 //해당아이템이 최대 갯수 넘었는지 확인
+                        return;
+                    }
                 }
             }
         }
 
         if (InventoryFullCheck())
         {
-            Debug.Log("full");
             return;
         }
 
-        CountableItem item = new CountableItem();
+        PortionItem item = new PortionItem();
         item.SetItem(id, amount, inventoryUI.FindFrontEmptySlotIndex());
         inventoryItems.Add(item);
         UpdateSlot(item);
+
+
+
+    }
+    public void ItemUse(int ivSlotNum,int quickSlotNum)
+    {
+        PortionItem pitem = inventoryItems[ivSlotNum] as PortionItem;
+        if (pitem == null)
+        {
+            return;
+        }
+        pitem.ItemUse();
+        pitem.amount--;
+
+        inventoryUI.UpdateSlotUI(pitem);
+        m_playerQuickSlot.UpdateQuickSlot(ivSlotNum);
+
+        if (pitem.amount<=0)
+        {
+            m_playerQuickSlot.RemoveItem(quickSlotNum);
+            RemoveItem(ivSlotNum);
+        }
+    }
+    public void AddCountableItem(int id, int amount)                    //갯수 샐수있는 아이템을 얻었을때
+    {
+        Debug.Log("AddCountableItem");
+        for (int i = 0; i < inventoryItems.Count; i++)
+        {
+            if (!inventoryItems[i].isEquipment)
+            {
+                if (inventoryItems[i] is CountableItem cItem)
+                {
+                    if (cItem.id == id && cItem.amount < itemMaxAmount)        //해당아이템을 이미 보유하고 있다면 
+                    {
+                        ChangeAmount(i, amount);            //아이템 갯수 추가
+                        ItemAmountOverCheck(i);                 //해당아이템이 최대 갯수 넘었는지 확인
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (InventoryFullCheck())
+        {
+            return;
+        }
+
+            CountableItem item = new CountableItem();
+            item.SetItem(id, amount, inventoryUI.FindFrontEmptySlotIndex());
+            inventoryItems.Add(item);
+            UpdateSlot(item);
+       
+
 
     }
     public void AddEquipmentItem(int id, int upgrade)               //장비아이템을 얻었을때
@@ -114,10 +167,10 @@ public class Inventory : MonoBehaviour
             Debug.Log("full");
             return;
         }
-
         EquipmentItem item = new EquipmentItem();
         item.SetItem(id, upgrade, inventoryUI.FindFrontEmptySlotIndex(), true);       //비어있는 가장 첫번쨰 위치찾기
         inventoryItems.Add(item);
+
         UpdateSlot(item);
     }
     public bool InventoryFullCheck()                            //인벤토리가 가득 찼을때
@@ -128,19 +181,38 @@ public class Inventory : MonoBehaviour
         }
         return false;
     }
-    public void RemoveItem(Item item, int amount = -1)              //아이템 삭제
+    public void FindAndRemoveItem(int itemid, int amount)              //아이템 삭제
     {
         if (amount.Equals(-1))
         {
-
+            Debug.Log("아이템 삭제 실패");
+            return;
         }
-
+        for (int i = 0; i < inventoryItems.Count; i++)
+        {
+            if (inventoryItems[i].id == itemid)
+            {
+                int remain = ChangeAmount(i, -amount);
+                if(remain<0)
+                {
+                    amount = -remain;
+                }
+                else
+                {
+                    RemoveItem(inventoryItems[i].slotNum);
+                    break;
+                }
+            }
+        }
     }
+    
     public void RemoveItem(int slotNum)                             //해당 슬롯번호를 가지는 아이템 삭제
     {
+
         inventoryItems.Remove(inventoryItems[FindIndexBySlotNum(slotNum)]);     //아이템 데이터 삭제
         inventoryUI.ClearSlot(slotNum);                                         //아이템 슬롯에 들어있는 데이터 삭제
     }
+
     public int FindIndexBySlotNum(int slotNum)                      //슬롯번호로 아이템 위치 찾기
     {
         int index = -1;
@@ -157,15 +229,34 @@ public class Inventory : MonoBehaviour
     }
     public Item FindItemBySlotNum(int num)                          //슬롯번호로 아이템 찾기
     {
+        Debug.Log("Item " + inventoryItems.Find(x => x.slotNum.Equals(num)));
         return inventoryItems.Find(x => x.slotNum.Equals(num));
     }
-    public void ChangeAmount(int index, int changeValue)
+    public int FindItemIndexBySlotNum(int slotNum) //해당 슬롯 번호에 있는 위치를 찾기(해당 슬롯 번호를 가지는아이템이없으면 -1 반환)
     {
-        CountableItem updatedItem = (CountableItem)inventoryItems[index];   //해당 아이템 갯수 추가
+        for (int i = 0; i < inventoryItems.Count; i++)                          //해당 슬롯이 가지고 있는 아이템의 데이터 위치 찾기
+        {
+            if (inventoryItems[i].slotNum == slotNum)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+    public int ChangeAmount(int index, int changeValue)
+    {
+        Debug.Log(index);
+        CountableItem updatedItem = (CountableItem)inventoryItems[index];
+        //해당 아이템이 0보다 적어질때 적어진 만큼 반환한다.
+        if (updatedItem.amount + changeValue < 0)
+        {
+            return updatedItem.amount + changeValue;
+        }
         updatedItem.amount += changeValue;
-        inventoryItems[index] = updatedItem;
 
+        inventoryItems[index] = updatedItem;
         UpdateSlot(inventoryItems[index]);
+        return 0;
     }
     public void ChangeSlotNum(int index, int changeValue)               //슬롯번호 변경(아이템 위치,바뀔 슬롯번호)
     {
@@ -238,17 +329,20 @@ public class Inventory : MonoBehaviour
     }
 
     // 인벤토리 관련 메서드 추가 (정렬, 아이템 사용 등)
-    public int FindItemIndexBySlotNum(int slotNum) //해당 슬롯 번호에 있는 위치를 찾기(해당 슬롯 번호를 가지는아이템이없으면 -1 반환)
+    public void SaveInventoryData()
     {
-        for (int i = 0; i < inventoryItems.Count; i++)                          //해당 슬롯이 가지고 있는 아이템의 데이터 위치 찾기
+        SaveLoadManager.Instance.SaveInventory(inventoryItems, playerGold);
+
+    }
+    public void LoadInventoryData(List<Item> items, int gold)
+    {
+        inventoryItems = items;
+        playerGold = gold;
+
+        inventoryUI.UpdateGoldUI(playerGold);
+        foreach(var a in inventoryItems)
         {
-            Debug.Log(inventoryItems[i].slotNum);
-            if (inventoryItems[i].slotNum == slotNum)
-            {
-                Debug.Log("aaa" + i);
-                return i;
-            }
+            inventoryUI.UpdateSlotUI(a);
         }
-        return -1;
     }
 }

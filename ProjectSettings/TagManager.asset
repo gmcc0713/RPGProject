@@ -8,6 +8,9 @@ TagManager:
   - Weapon
   - Ground
   - ItemIcon
+  - AttackCollider
+  - Non
+  - InteractionObject
   layers:
   - Default
   - TransparentFX
@@ -18,7 +21,7 @@ TagManager:
   - Ground
   - MainCamera
   - MinimapCamera
-  - 
+  - Enemy
   - 
   - 
   - 

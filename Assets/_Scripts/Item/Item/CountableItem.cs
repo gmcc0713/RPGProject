@@ -5,6 +5,7 @@ using UnityEngine;
 public class CountableItem : Item
 {
     public int amount;
+    public bool m_bCanUse;
     private void Start()
     {
         Initialize();
@@ -22,5 +23,8 @@ public class CountableItem : Item
         slotNum = _slotNum;
         amount = _amount;
     }
+    public override void ItemUse()
+    {
 
+    }
 }

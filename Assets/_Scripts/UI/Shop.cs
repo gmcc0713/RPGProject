@@ -25,7 +25,7 @@ public class Shop : MonoBehaviour
     {
         for(int i = 0; i < count; i++)
         {
-            Debug.Log("MakeShopSlot");
+            //오브젝트 풀링으로
             GameObject clone = Instantiate(slotPrefab);
             clone.transform.SetParent(parent.transform, false);
 

@@ -1,40 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Quests>
+	
 	<NPC id='0'>
 		<Quest>
 			<ID>0</ID>
 			<Title>몬스터 사냥꾼의 부상</Title>
-			<Description> 외눈 슬라임 5마리 처치 </Description>
+			<Description>부상당한 사냥꾼을 위해서 외눈 슬라임 10마리를 처치해주자. </Description>
 			<Reward>0</Reward>
+			<QuestType>0</QuestType>
+			<RequireID>1</RequireID>
+			<RequireCount>10</RequireCount>
+			<RequireLV>10</RequireLV>
 			<Dialog>
-				<Step>
-					1
-					<Speaker> 1 </Speaker>
-					<text> 자네 모험가인가? 부탁이 있다네.</text>
+				<Step>1
+					<text>자네 모험가인가? 부탁이 있다네.</text>
 				</Step>
-				<Step>
-					2
-					<Speaker> 0 </Speaker>
-					<text> 무슨 일이시죠? </text>
+				<Step>2
+					<text>내가 몬스터를 사냥하다가 큰 부상을 당해서 할당량을 채우지 못했네. </text>
 				</Step>
-				<Step>
-					3
-					<Speaker> 1 </Speaker>
-					<text> 내가 몬스터를 사냥하다가 큰 부상을 당해서 할당량을 채우지 못했네. </text>
-				</Step>
-				<Step>
-					4
-					<Speaker> 0 </Speaker>
-					<text> 괜찮으신가요? </text>
-				</Step>
-				<Step>
-					5
-					<Speaker> 1 </Speaker>
-					<text> 괜찮다네. 자네가 나 대신 외눈 슬라임 5마리를 잡아줄 수 있겠나? </text>
+				<Step>3
+					<text>자네가 나 대신 외눈 슬라임 10마리를 잡아줄 수 있겠나? </text>
 				</Step>
 			</Dialog>
+			<QuestAccept>고맙네. 힘들더라도 부탁하겠네. </QuestAccept>
+			<QuestCancle>아쉽지만 생각이 바뀌면 다시 찾아주시게.</QuestCancle>
+			<QuestNon>자네에게 줄 의뢰는 없다네. 다음에 찾아주시게</QuestNon>
 		</Quest>
-		
+		<Quest>
+			<ID>1</ID>
+			<Title>대장장이 아르질의 고민</Title>
+			<Description>대장장이 아르질이 재료가 없어서 무기를 만들 수 없다고 한다. 슬라임 점액질 5개를 구해주자</Description>
+			<Reward>0</Reward>
+			<QuestType>1</QuestType>
+			<RequireID>4</RequireID>
+			<RequireCount>5</RequireCount>
+			<RequireLV>10</RequireLV>
+			<Dialog>
+				<Step>1
+					<text>재료가 없어서 대장간 일을 할 수가 없네.</text>
+				</Step>
+				<Step>2
+					<text>제발 나를 도와서 무기 제작 재료를 구해다 줄수 있겠나? 보상은 두둑히 주겠다네</text>
+				</Step>
+				<Step>3
+					<text>슬라임 점액질 5개면 충분하네. 부탁하겠네</text>
+				</Step>
+			</Dialog>
+			<QuestAccept>꼭 빨리 돌아와주시게. </QuestAccept>
+			<QuestCancle>급한일인데 바쁘다면 어쩔수 없구만</QuestCancle>
+			<QuestNon>뭘 쳐다보나? 자네한테 줄 의뢰가 없으니 돌아가!!</QuestNon>
+		</Quest>
+	
 	</NPC>
 
 </Quests>

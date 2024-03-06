@@ -11,13 +11,7 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private GameObject movebar;
     [SerializeField] private TextMeshProUGUI inventoryGold;
 
-
-
-    private void Start()
-    {
-        Initialize();
-    }
-    private void Initialize()
+    public void Initialize()
     {
         for (int i = 0; i < inventorySlots.Count; i++)
         {
@@ -36,17 +30,21 @@ public class InventoryUI : MonoBehaviour
         return -1;
 
     }
-
-    public void UpdateSlotUI(CountableItem newitem)    //슬롯 업데이트
+    public void UpdateSlotUI(Item newitem)    //슬롯 업데이트
     {
-        inventorySlots[newitem.slotNum].SetItemUI(newitem.id, newitem.amount);
+        if (newitem.isEquipment)
+        {
+            inventorySlots[newitem.slotNum].SetItemUI(newitem.id);
+            return;
+        }
+        if (newitem is CountableItem cItem)
+            inventorySlots[cItem.slotNum].SetItemUI(cItem.id, cItem.amount);
+        
     }
-    public void UpdateSlotUI(EquipmentItem newitem)    //슬롯 업데이트
-    {
-        inventorySlots[newitem.slotNum].SetItemUI(newitem.id);
-    }
+ 
     public void ClearSlot(int slotIndex)    //슬롯 삭제
     {
+        if (inventorySlots[slotIndex])
         inventorySlots[slotIndex].SetEmpty();
     }
     public bool EmptyCheck(int index)
