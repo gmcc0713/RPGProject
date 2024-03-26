@@ -1,5 +1,5 @@
-Id,PortionType,PortionValue
-0,HP,500
-1,HP,1000
-2,MP,500
-3,MP,1000
+Id,PortionType,PortionValue,Cooltime
+0,HP,500,10
+1,HP,1000,10
+2,MP,500,10
+3,MP,1000,10

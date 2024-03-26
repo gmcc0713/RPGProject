@@ -2,3 +2,4 @@ Id,MonsterName,MonsterType,SearchRange,AttackRange,AttackDuration,AttackDamage,M
 0,Ã¶°©°ÅºÏ,Turtle,7,3,2.3,5,200,5,0
 1,¿Ü´« ½½¶óÀÓ,Slime,7,3,2.3,10,500,5,1
 2,½ºÄÌ·¹Åæ,Skeleton,10,3,2.3,20,1000,5,2
+3,°ñ·½,Golam,20,5,2.3,100,10000,5,2

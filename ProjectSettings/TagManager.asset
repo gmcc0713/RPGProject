@@ -11,6 +11,8 @@ TagManager:
   - AttackCollider
   - Non
   - InteractionObject
+  - FxTemporaire
+  - EndPos
   layers:
   - Default
   - TransparentFX
