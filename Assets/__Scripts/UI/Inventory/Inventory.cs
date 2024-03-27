@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -17,6 +18,7 @@ public class Inventory
         inventoryItems = new List<Item>();
         UIManager.Instance._InventoryUI.UpdateGoldUI(playerGold);
         SaveLoadManager.Instance.LoadInventory();
+        
     }
     public bool BuyItem(int id, int gold)
     {
@@ -213,7 +215,8 @@ public class Inventory
     }
     public int FindItemIdBySlotNum(int num)
     {
-        return inventoryItems[num].id;
+       ;
+        return inventoryItems[FindIndexBySlotNum(num)].id;
     }
     public Item FindItemBySlotNum(int num)                          //슬롯번호로 아이템 찾기
     {
@@ -306,13 +309,46 @@ public class Inventory
             return;
         }
         
+        if(inventoryItems[index1].id == inventoryItems[index2].id) 
+        {
+            if (inventoryItems[index1] is CountableItem cItem1 && inventoryItems[index2] is CountableItem cItem2)
+            {
+                if(itemMaxAmount > cItem2.amount + cItem1.amount)
+                {
+                    cItem2.amount += cItem1.amount;
+                    RemoveItem(baseitem);
+                    UpdateSlot(cItem2);
 
+                }
+                else
+                {
+                    cItem2.amount = itemMaxAmount;
+                    cItem1.amount = cItem2.amount + cItem1.amount - itemMaxAmount;
+                    UpdateSlot(cItem1);
+                    UpdateSlot(cItem2);
+                }
+            }
+            return;
+        }
         ChangeSlotNum(index1, ChangeItem);
         ChangeSlotNum(index2, baseitem);
+
+    }
+    public void SwapSlot(int index1,int index2)
+    {
+        int slotTmp = inventoryItems[index1].slotNum;
+        Item tmp = inventoryItems[index1];
+
+        inventoryItems[index1] = inventoryItems[index2];
+        inventoryItems[index1].slotNum = inventoryItems[index2].slotNum;
+
+        inventoryItems[index2] = tmp;
+        inventoryItems[index2].slotNum = slotTmp;
+
+
         UpdateSlot(inventoryItems[index1]);
         UpdateSlot(inventoryItems[index2]);
     }
-
     // 인벤토리 관련 메서드 추가 (정렬, 아이템 사용 등)
     public void SaveInventoryData()
     {
@@ -328,6 +364,23 @@ public class Inventory
         foreach(var a in inventoryItems)
         {
             UIManager.Instance._InventoryUI.UpdateSlotUI(a);
+        }
+    }
+    public void Divide(int slotNum,int amount)
+    {
+        if(inventoryItems[FindIndexBySlotNum(slotNum)] is CountableItem cItem)
+        {
+            cItem.amount -= amount;
+            if (InventoryFullCheck())
+            {
+                return;
+            }
+
+            CountableItem item = new CountableItem();
+            item.SetItem(cItem.id, amount, UIManager.Instance._InventoryUI.FindFrontEmptySlotIndex());
+            inventoryItems.Add(item);
+            UpdateSlot(item);
+            UpdateSlot(cItem);  
         }
     }
 }

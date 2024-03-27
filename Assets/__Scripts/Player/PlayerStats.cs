@@ -21,8 +21,6 @@ public struct PlayerStatsData
     public int Critical;
 }
 
-// 세이브 할때 세이브용 데이터 클래스 새로 생성 후 해당 데이터로 처리
-// 
 public class PlayerStats : MonoBehaviour
 {
     public static PlayerStats Instance { get; private set; }
@@ -38,6 +36,7 @@ public class PlayerStats : MonoBehaviour
     private StatsPoint m_StatsPoint;
     private PlayerStatsData m_StatsData;
     private PlayerStatsData m_AdditionalPlayerStats;
+    private PlayerStatsData m_default;
     [SerializeField] private StatsUI m_UISet;
     public StatsPoint _StatsPoint => m_StatsPoint;
     public PlayerStatsData _StatsData => m_StatsData;
@@ -117,6 +116,27 @@ public class PlayerStats : MonoBehaviour
         m_StatsPoint.m_iRemainStatsPoint += count;
         m_UISet.UpdateUI(m_StatsData, m_StatsPoint);
         m_UISet.UpdateStatsPointUpUI(true);
+    }
+    public void StatsBuff(bool buf)
+    {
+        Debug.Log("11111");
+        if (buf)
+        {
+            Debug.Log(m_StatsData.AttackDamage);
+            m_default = m_StatsData;
+            m_StatsData.AttackDamage += m_StatsData.AttackDamage / 2;
+            m_StatsData.Critical += m_StatsData.Critical / 2;
+        }
+        else
+        {
+            m_StatsData = m_default;
+        }
+    }
+    public IEnumerator CoolDown(float coolTime)
+    {
+        StatsBuff(true);
+        yield return new WaitForSeconds(coolTime);
+        StatsBuff(false);
     }
 
 }

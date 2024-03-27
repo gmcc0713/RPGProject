@@ -87,7 +87,6 @@ public class ItemDataManager : MonoBehaviour
     }
     public Sprite FindItemImage(int num)
     {
-        Debug.Log(num);
         return m_lItemDatas[num].itemIcon;
     }
     public bool CheckIsEquipmentItem(int num)

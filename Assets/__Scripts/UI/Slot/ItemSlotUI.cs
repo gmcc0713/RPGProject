@@ -15,6 +15,9 @@ public class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     protected bool m_bIsEmpty;
     protected int m_iSlotNum;
     [SerializeField] protected SlotType m_eSlotType;
+    [SerializeField] protected Button m_selectButton;
+
+    private bool M_bCanDivide;
     public SlotType _eSlotType => m_eSlotType;
     public int _iSlotNum => m_iSlotNum;
     public bool _bIsEmpty => m_bIsEmpty;
@@ -62,7 +65,7 @@ public class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         {
             ViewIcon.instance.transform.position = eventData.position;
         }
-        this.GetComponentInParent<QuickSlotUI>();
+        this.GetComponentInParent<ItemQuickSlotUI>();
     }
 
 
@@ -151,7 +154,40 @@ public class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
         m_itemAmountText.text = amount.ToString();
     }
 
+    public void SelectBtnOn(bool b)
+    {
+        if(b)
+        {
+            m_selectButton.gameObject.SetActive(true);
+            Item item = ThirdPersonMovement.Instance._Inventory.FindItemBySlotNum(m_iSlotNum);
+            if (item is CountableItem cItem)
+            {
+                if (cItem.amount > 1)
+                {
+                    m_selectButton.image.color = new Color(0, 1, 0, 0.2f);
+                    M_bCanDivide = true;
+                    return;
+                }
+            }
+            m_selectButton.image.color = new Color(1, 0, 0, 0.2f);
+            M_bCanDivide = false;
+            return;
+        }
+        m_selectButton.gameObject.SetActive(false);
 
+    }
+    public void DivideBtnClickCheck()
+    {
+        if(!M_bCanDivide)
+        {
+            return;
+        }
+        Item item = ThirdPersonMovement.Instance._Inventory.FindItemBySlotNum(m_iSlotNum);
+        if (item is CountableItem cItem && !m_bIsEmpty)
+        {
+            UIManager.Instance._InventoryUI.DivideItem(m_iSlotNum);
+        }
+    }
     /*public void UpdateSlot(int inventoryNumber)
     {
         Item item = Inventory.Instance.FindItemBySlotNum(slotNum);

@@ -36,10 +36,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private StatsUI m_StatsUI;
     [SerializeField] private PlayerDataUI m_PlayerDataUI;
     [SerializeField] private QuestUI m_QuestUI;
-    [SerializeField] private QuickSlotUI m_QuickSlotUI;
+    [SerializeField] private QuickSlotUIController m_QuickSlotUI;
 
     public QuestUI _QuestUI => m_QuestUI;
-    public QuickSlotUI _QuickSlotUI => m_QuickSlotUI;
+    public QuickSlotUIController _QuickSlotUI => m_QuickSlotUI;
     public InventoryUI _InventoryUI => m_InventoryUI;
     void Start()
     {

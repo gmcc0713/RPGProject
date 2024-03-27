@@ -44,6 +44,7 @@ public class ThirdPersonMovement : MonoBehaviour
     private bool isAttack;
     public bool _isAttack { get; set; }
     public bool _isMove { get; set; }
+    public PlayerSkill _PlayerSkill => m_PlayerSkill;
     private int attackCombo = 0;
     [SerializeField] private AttackCollider m_attackCollider;
     public bool _canAct { get; set; }
@@ -54,6 +55,8 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField]  private float m_iCurPlayerHealth;
     [SerializeField]  private float m_iCurPlayerMP;
     [SerializeField] private Equipment m_Equipment;
+    [SerializeField] private PlayerSkill m_PlayerSkill;
+
 
     public void Start()
     {
@@ -67,6 +70,7 @@ public class ThirdPersonMovement : MonoBehaviour
         InputKey();
 
     }
+
    public void Initialize()
     {
         m_PlayerData = SaveLoadManager.Instance.LoadPlayerData();
@@ -153,10 +157,15 @@ public class ThirdPersonMovement : MonoBehaviour
             }
         }
     }
-    public void SetDamage()
+    public void Buff()
+    {
+        StartCoroutine(m_statsData.CoolDown(4.0f));
+    }
+
+    public void SetDamage(int additionalDamage = 0)
     {
         
-        m_attackCollider.SetPlayerDamage(m_statsData._StatsData.AttackDamage);
+        m_attackCollider.SetPlayerDamage(m_statsData._StatsData.AttackDamage + additionalDamage);
         m_attackCollider.SetCritical(m_statsData._StatsData.Critical);
         m_attackCollider.SetWeaponDamage(m_statsData._StatsData.Critical);
     }
